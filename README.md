@@ -1,3 +1,3 @@
-# EOH_2018
+# EOH 2018
 
-Visualization for electronic band EOH project.
+Sound visualization for electronic band EOH project.
