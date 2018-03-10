@@ -86,20 +86,22 @@ def sample_sound():
         fft = np.fft.rfft(buf * Hann)
 
         # Get frequency of maximum response in range
-        freq = []
-        freq.append((np.abs(fft[imin:imax]).argmax() + imin) * dFreq)
+        fi = ((np.abs(fft[imin:imax]).argmax() + imin) * dFreq)
 
         # Get MIDI number and nearest int
-        n = freq_to_MIDI(freq)
+        freq = []
+        freq.append(fi)
+
+        n = freq_to_MIDI(fi)
         n0 = int(round(n))
         name = []
-        name.append(n0)
-
+        name.append(MIDI_name(n0))
+        
         # Console output once we have a full buffer
         ##global frames
         frames += 1
 
         if frames >= FFTSize:
-            print('frequency: {:8.0f} Hz     note: {:>3s} '.format(freq, MIDI_name(n0)))
+            print('frequency: {:8.0f} Hz     note: {:>3s} '.format(freq[0], MIDI_name(n0)))
             stream.stop_stream()
             return freq, name
