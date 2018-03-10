@@ -2,9 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from math import pi, sin
-#import soundtest as st
+import soundtest as st
 
-xdata = np.linspace(0, 2*np.pi, 60000)
+xdata = np.linspace(0, 2*np.pi, 30000)
 j = np.size(xdata)
 
 xdata = np.reshape(xdata, (1, j))
