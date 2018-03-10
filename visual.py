@@ -10,7 +10,7 @@ ax.plot(xdata, y1data)
 #ln, = plt.plot([], [], 'ro', animated=True)
 
 def update(frame):
-	f1 = st.sample_sound()
+	f1, name = st.sample_sound()
 	y1data = np.sin(f1*xdata + frame)
 	ax.clear()
 	ax.plot(xdata, y1data)
