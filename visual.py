@@ -1,20 +1,20 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-import math
 import soundtest as st
 
 fig, ax = plt.subplots()
-xdata = np.linspace(0, 2*np.pi, 200)
-ydata = np.sin(xdata)
-ax.plot(xdata, ydata)
+xdata = np.linspace(0, 2*np.pi, 10000)
+y1data = np.sin(xdata)
+ax.plot(xdata, y1data)
 #ln, = plt.plot([], [], 'ro', animated=True)
 
 def update(frame):
-	f = st.sample_sound()
-	ydata = np.sin(f*xdata + frame)
+	f1 = st.sample_sound()
+	y1data = np.sin(f1*xdata + frame)
 	ax.clear()
-	ax.plot(xdata, ydata)
+	ax.plot(xdata, y1data)
+	ax.set_xlim(0, np.pi/10)
 #    ln.set_data(xdata, ydata)
 #    return ln,
 
