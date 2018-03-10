@@ -99,4 +99,4 @@ def sample_sound():
         if frames >= FFTSize:
             print('frequency: {:8.0f} Hz     note: {:>3s} '.format(freq, MIDI_name(n0)))
             stream.stop_stream()
-            return freq
+            return freq, MIDI_name(n0)
