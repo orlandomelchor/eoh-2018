@@ -83,19 +83,20 @@ def sample_sound():
         buf[-FSize:] = np.fromstring(stream.read(FSize, exception_on_overflow = False), np.int16)
 
         # Run the FFT on the windowed buffer
-        fft = np.fft.rfft(buf * Hann)
-
+        signal = buf*Hann
+        fourier = np.fft.rfft(signal)
         # Get frequency of maximum response in range
-        fi = ((np.abs(fft[imin:imax]).argmax() + imin) * dFreq)
+        fi = np.array([((np.abs(fourier[imin:imax]).argmax() + imin) * dFreq)])
 
         # Get MIDI number and nearest int
         freq = []
-        freq.append(fi)
-
-        n = freq_to_MIDI(fi)
-        n0 = int(round(n))
         name = []
-        name.append(MIDI_name(n0))
+        for k in range(np.size(fi)):
+            freq.append(fi[k])
+
+            n = freq_to_MIDI(fi[k])
+            n0 = int(round(n))
+            name.append(MIDI_name(n0))
         
         # Console output once we have a full buffer
         ##global frames

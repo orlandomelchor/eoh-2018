@@ -18,9 +18,9 @@ def update(frame):
 	ax.clear()
 	ax2.clear()
 	#A Major Chord exhibit (A, C#, E)
-	f, name = np.asarray([440.0, 554.37, 659.25]), ["A","C#","E"]
+	#f, name = np.asarray([440.0, 554.37, 659.25]), ["A","C#","E"]
 	#Microphone input exhibit
-	#f, name = st.sample_sound()
+	f, name = st.sample_sound()
 	f = np.asarray(f)
 
 	i=np.size(f)
@@ -45,5 +45,5 @@ def update(frame):
 	ax.legend(bbox_to_anchor=(1,1), bbox_transform=plt.gcf().transFigure)
 	ax2.legend()
 
-ani = FuncAnimation(fig, update, interval=50)
+ani = FuncAnimation(fig, update, interval=10)
 plt.show()
