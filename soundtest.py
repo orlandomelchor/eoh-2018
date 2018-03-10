@@ -17,8 +17,8 @@ from matplotlib.animation import FuncAnimation
 ######################
 #Sampling Parameters			##can be optimized
 
-MIDIMin=60	#C4
-MIDIMax=69	#A4				##chosen simply because they were prominent in resource 
+MIDIMin=0 #60	#C4
+MIDIMax=100 #69	#A4				##chosen simply because they were prominent in resource 
 FSamp=int(1e5)	#Hz	#Sampling rate for the FFT
 FSize=2**10	#Frames per buffer
 FFTSize=2**4	#Frames for FFT averaging

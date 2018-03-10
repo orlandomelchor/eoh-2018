@@ -14,9 +14,11 @@ def update(frame):
 	y1data = np.sin(f1*xdata + frame)
 	ax.clear()
 	ax.plot(xdata, y1data)
+	ax.set_ylim(-1.5,1.5)
 	ax.set_xlim(0, np.pi/10)
 #    ln.set_data(xdata, ydata)
 #    return ln,
 
 ani = FuncAnimation(fig, update, interval=50)
+
 plt.show()
