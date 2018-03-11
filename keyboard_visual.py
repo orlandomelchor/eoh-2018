@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from math import pi, sin
 import soundtest as st
+import sys
 
 xdata = np.linspace(0, 2*np.pi, 30000)
 j = np.size(xdata)
@@ -12,7 +13,7 @@ fig = plt.figure()
 ax = fig.add_subplot(211)
 ax2 = fig.add_subplot(212)
 
-
+i = int(sys.argv[1])
 
 def update(frame):
 	ax.clear()
@@ -20,10 +21,9 @@ def update(frame):
 	#A Major Chord exhibit (A, C#, E)
 	#f, name = np.asarray([440.0, 554.37, 659.25]), ["A","C#","E"]
 	#Microphone input exhibit
-	f, name = st.sample_sound()
+	f, name = st.sample_sound(i)
 	f = np.asarray(f)
 
-	i=np.size(f)
 	f = np.reshape(f, (1, i))
 	curve_arr = f.T @ (xdata+float(frame))
 	actual = np.zeros(j)

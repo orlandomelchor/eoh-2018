@@ -72,7 +72,30 @@ imax = min(FFTSamp, int(np.ceil(MIDI_to_bin(MIDIMax+1))))
 print('sampling at', FSamp, 'Hz with max resolution of', dFreq, 'Hz')
 print()
 
-def sample_sound():
+def gaus(x,a,x0,sigma):
+    return a*exp(-(x-x0)**2/(2*sigma**2))
+
+#finds n number of harmonics
+#spacing is the width of the peak
+def peaks(arr, n, spacing=10):
+    arr=np.array(arr)
+    L=np.argsort(-1*arr)
+    bad_idx=[]
+    for i in range(len(L)-1):
+        if abs(L[i]-L[i+1])<spacing:
+            bad_idx.append(i+1)
+    L=np.delete(L,bad_idx)
+    peaks=L[:n]
+    return peaks
+
+def maximums(arr, initial, final):
+    x_1 = arr[initial:final]
+    b={np.abs(x_1[i]):(i+initial) for i in range(final-initial)}
+    a = np.sort(x_1)[::-1]
+    c = np.abs(a[0:3])
+    return c
+
+def sample_sound(num_freq):
     frames = 0
     stream.start_stream() #program starts listening 
     # While input stream is open
@@ -84,9 +107,12 @@ def sample_sound():
 
         # Run the FFT on the windowed buffer
         signal = buf*Hann
+
         fourier = np.fft.rfft(signal)
+        fi = (peaks(np.abs(fourier[imin:imax]), num_freq) + imin) * dFreq
+        #print(fourier)
         # Get frequency of maximum response in range
-        fi = np.array([((np.abs(fourier[imin:imax]).argmax() + imin) * dFreq)])
+        #fi = np.array([((np.abs(fourier[imin:imax]).argmax() + imin) * dFreq)])
 
         # Get MIDI number and nearest int
         freq = []
