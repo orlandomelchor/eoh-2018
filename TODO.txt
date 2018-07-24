@@ -1,0 +1,20 @@
+task 1:
+	- we need a really good python FFT that is available. Currently we are using the numpy
+	  FFT but I'm hoping we could do better.
+	- we need a good way of removing the background noise that the FFT is receiving. 
+	  Currently I'm thinking about sampling the background every couple of seconds and
+	  taking the average over all the runs then "subtracting" this off from the original 
+	  signal.
+	- we could also get a better signal with a better mic
+	- we need to update sound_animation.py slightly so that it is compatible with the changes made so far
+
+task 2: 
+        - using the harmonic from the program insert these harmonics into the synth and show 
+	  that the sound is the same as the actual instrument being played.
+
+task 3:
+	- we need code that can identify chords
+
+
+task 4: (long term project)
+	- we need code that will take a music and write the sheet music

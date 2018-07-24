@@ -1,24 +1,26 @@
-import numpy as np 
-import pyaudio
-import matplotlib as pyplot
-from matplotlib.animation import FuncAnimation
-
 #! /usr/bin/env python
 ######################
-#Author: Anil Radhakrishnan
-#Last Updated: 2017/12/19
+#Authors: Anil Radhakrishnan
+#         Sarah Habib
+#         Orlando Melchor-Alonso
+#Last Updated: 2018/03/20
 ######################
 #Objective: Progam capable of identifying musical notes in real time
 #Future: Create a visualization module
 ######################
+
+import numpy as np 
+import pyaudio
+import matplotlib as pyplot
+from matplotlib.animation import FuncAnimation
 
 ####
 #https://newt.phys.unsw.edu.au/jw/notes.html resource for notes to frequency conversion
 ######################
 #Sampling Parameters			##can be optimized
 
-MIDIMin=0 #60	#C4
-MIDIMax=100 #69	#A4				##chosen simply because they were prominent in resource 
+MIDIMin=50 #60	#C4
+MIDIMax=90 #69	#A4				##chosen simply because they were prominent in resource 
 FSamp=int(1e5)	#Hz	#Sampling rate for the FFT
 FSize=2**10	#Frames per buffer
 FFTSize=2**4	#Frames for FFT averaging
@@ -72,9 +74,6 @@ imax = min(FFTSamp, int(np.ceil(MIDI_to_bin(MIDIMax+1))))
 print('sampling at', FSamp, 'Hz with max resolution of', dFreq, 'Hz')
 print()
 
-def gaus(x,a,x0,sigma):
-    return a*exp(-(x-x0)**2/(2*sigma**2))
-
 #finds n number of harmonics
 #spacing is the width of the peak
 def peaks(arr, n, spacing=10):
@@ -109,6 +108,7 @@ def sample_sound(num_freq):
         signal = buf*Hann
 
         fourier = np.fft.rfft(signal)
+        #print((np.abs(fourier[imin:imax]).argmax()+imin)*dFreq)
         fi = (peaks(np.abs(fourier[imin:imax]), num_freq) + imin) * dFreq
         #print(fourier)
         # Get frequency of maximum response in range
@@ -129,6 +129,7 @@ def sample_sound(num_freq):
         frames += 1
 
         if frames >= FFTSize:
-            print('frequency: {:8.0f} Hz     note: {:>3s} '.format(freq[0], MIDI_name(n0)))
+            #print('frequency: {:8.0f} Hz     note: {:>3s} '.format(freq[0], MIDI_name(n0)))
+            freq = np.sort(np.asarray(freq, float))
             stream.stop_stream()
             return freq, name

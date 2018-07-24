@@ -1,3 +1,13 @@
+#! /usr/bin/env python
+######################
+#Author: Ian Carpenter
+#Last Updated: 2018/03/20
+######################
+#Objective: Progam capable of identifying musical notes in real time
+#Future: Create a visualization module
+######################
+
+
 import pygame
 import array
 

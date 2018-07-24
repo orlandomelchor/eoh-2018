@@ -1,0 +1,69 @@
+###overtone demos###
+
+demo 1 - Given the sound of an instrument in a file play the file, show the waveform and plot 
+	 its first few harmonics on an fft.
+
+demo 2 - Show the difference between an open and closed instrument on an fft using sound files.
+
+demo 3 - Given the sound of an instrument in real time show the waveform and plot its first few 	 harmonics on an fft before and after denoising. 
+
+demo 4 - From the harmonics of different sounds draw the musical notes on a staff in real time.
+
+demo 5 - From the harmonics show what the components and superposition of individual waves look 	 like for different instruments.
+
+demo 6 - Given the harmonics of an instrument recreate the sound on an electronic keyboard/synth.
+
+###chord demos###
+
+demo 7 - Given the sound on a keyboard determine what chord is being played and draw it on a 
+	 staff.
+
+demo 8 - Given the sound on a keyboard determine what chord is being played and plot the 		 components and superposition of individual sound waves.
+
+demo 9 - Given two or more notes show why the notes or chords are consonant or dissonant by 		 plotting their components and showing their periodicity.
+
+
+###future (difficult) work###
+
+demo 10 - Given segments from a musical piece determine what key it is in.
+
+demo 11 - Given segments from a musical piece determine the rhythm in that segment.
+
+demo 12 - Given segments from a musical piece determine its dynamics 
+
+demo 13 - Given a recording of a musical piece attempt to recreate that piece on sheet music
+
+
+###Physical properties of music to explore###
+	pitch
+	tambre
+	chords
+	consonance and dissonance
+	what is noise vs what is music
+	sounds in different media
+	compare and contrast wave properties of light and sound (photons and phonons)
+	sound as a longitudinal wave vs light as a transverse wave
+	process of hearing
+	monotonic vs polytonic (timbre)
+	fundamental, harmonics, and overtones 
+	superposition of waves and harmonics
+	Fourier analysis
+	overtones on a staff vs overtones on FFT
+	describe different types of noise (white noise etc.)
+	musical intervals and frequency ratios
+	polychromatic and polytonic (white noise and white light)
+	sound and amplitude is logarithmic (compare 100 to 200 and 800 to 900)
+	melody vs harmony
+	tonic, tuning system, and mode
+	consonance determined by shared overtones and periodicity
+	pentatonic, hexatonic, heptatonic, octatonic, dodecatonic as interval patterns
+	Nonwestern music vs western music
+	the less prime factors in an interval, the more consonant it sounds
+	perfect fourth vs imperfect fourth interval is not good enough
+	aeolian, locrian, ionian, dorian, phrygian, lydian, mixolydian diatonic scales
+	inversions as pairs of intervals that together form an octave
+	perfect fourth followed by a perfect fifth is uniquely the same if the order is reversed
+	ideal tritone and the square root of two
+	pentatonic scales and removing semitones
+	minor pentatonic, major pentatonic, egyptian, minor blues, major blues
+	equal temperament vs just intonation
