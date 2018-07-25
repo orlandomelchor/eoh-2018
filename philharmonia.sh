@@ -46,8 +46,10 @@ done
 
 cd ../../
 
+python fund_note.py write
+
 for i in $(seq 1 20);
 do
-        python fund_note.py $i overwrite finalize
+        python fund_note.py read finalize $i
 done
 
