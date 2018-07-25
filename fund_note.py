@@ -31,7 +31,7 @@ thresh   = 0.005              #percentage from peak frequency to use in threshol
 #location of the samples, data, and output file
 dir_ = 'philharmonia/all-samples/'
 data_dir = 'philharmonia/data/'
-output_csv = '{}philharmonia_harmonics_{}.csv'.format(data_dir, numHarm)
+output_csv = '{}philharmonia_harmonics.csv'.format(data_dir)
 
 #location of saved models
 classifier_dir = 'models/'
@@ -87,10 +87,9 @@ def sample_sound_file(file, numHarm):
 
 def freq_to_MIDI(f):
 	#midi = 69 is A4
-	fi = f[f!=0]
-	ni = 69 + 12*np.log2(fi/440.0)
-	n0 = f[f==0]
-	return np.hstack((ni,n0))
+	f2 = np.copy(f)
+	f2[f2!=0] = 69 + 12*np.log2(f2[f2!=0]/440.0)
+	return f2
 
 def name_to_MIDI(note):
 	return (noteNames.index(note[:-1]))+(int(note[-1])+1)*12
@@ -99,31 +98,33 @@ def MIDI_to_freq(n):
 	return 440 * pow(2.0,(n-69)/12.0)
 
 def find_nearest(n_harmonics, n):
-    ci = 100*np.abs(n_harmonics - n)
-    #print n_harmonics, n, ci, np.sum(ci < cents) < 1
-    if np.sum(ci < cents) < 1:
-    	return numHarm
-    return (ci-cents).argmin()
+    ci = 100*np.abs(n_harmonics - n.reshape(n.shape[0],1))
+    #get the elements without a nearest value within the cents threshold
+    cond = (np.sum(ci < cents, axis=1) == 0)
+    labels = np.zeros(cond.shape[0],int)
+    labels[cond] = numHarm
+    labels[~cond] = np.argmin((ci[~cond]-cents),axis=1)
+    return labels
 
-def create_data():
+def write_data():
 	#column names for the csv file
+	print 'writing data...'
+	totHarm = 1000
 	col = []
-	for i in range(0, numHarm):
+	for i in range(0, totHarm):
 		col.append('harmonic #{}'.format(i))
-	col.append('fundamental index')
 	col.append('fundamental frequency')
 
 	#initialize features, index labels, fundamental frequencies, and feature names
-	X = np.array([]).reshape(0,numHarm)
-	y = np.array([], int)
+	X = np.array([]).reshape(0,totHarm)
 	f = np.array([], int)
 	names = np.array([],str)
 
 	#get the instrument directories
 	directories = [instrument for instrument in os.listdir(dir_) if os.path.isdir(dir_+instrument)]
-	for directory in directories:
+	for itr, directory in enumerate(directories):
 		#print the instrument being loaded
-		print '{}:'.format(directory)
+		print 'progress: {}%\r'.format(round(itr*100.0/len(directories)))
 		#get all the files for that instrument
 		files = [name for name in os.listdir(dir_+directory+'/')]
 		for file in files:
@@ -132,42 +133,43 @@ def create_data():
 			#if the files only contain a single note and are not phrases do the following
 			if (sep[4] == 'normal' and sep[2].isdigit()):
 				#the features are the frequency harmonics from the fft of the signal
-				features = sample_sound_file(dir_+directory+'/'+file, numHarm) #features
+				features = sample_sound_file(dir_+directory+'/'+file, totHarm) #features
 				#convert to midi form because musical notes are seperated logarithmically so we need to find nearest on a linear scale (MIDI)
 				harmonics = freq_to_MIDI(features)
 				n = int(name_to_MIDI(sep[1]))
-				#the label is the index of the harmonics that is closest to the fundamental frequency
-				label = find_nearest(harmonics, n)
-				#print all the files that are excluded from the training (most are either too short, too soft, too low, or too high)
-				if label == numHarm:
-					print '\tremoving {}'.format(file)
-					continue
 				#build the features, labels, fundamental frequency, and feature names
 				X = np.vstack((X,features))
-				y = np.hstack((y, label))
 				f = np.hstack((f, MIDI_to_freq(n)))
 				names = np.hstack((names, file))
+	#shapes just for check
 	print 'features shape: {}'.format(X.shape)
-	print 'labels shape: {}'.format(y.shape)
 	print 'frequency shape: {}'.format(f.shape)
-
-	print 'saving csv file...'
 
 	#save file of the data collected
-
-	data_frame = np.hstack((X,y.reshape(y.shape[0],1),f.reshape(f.shape[0],1)))
+	print 'saving csv file...'
+	data_frame = np.hstack((X,f.reshape(f.shape[0],1)))
 	data = pd.DataFrame(data_frame, columns=col, index = names)
 	data.to_csv(output_csv)
-	return X, y
+	return read_data()
 
 def read_data():
-	data_frame = pd.read_csv(output_csv).values
-	X = data_frame[:,1:-2]
-	y = data_frame[:,-2].astype(int)
-	f = data_frame[:,-1]
+	print 'loading csv file...'
+	col = pd.read_csv(output_csv, nrows=1).columns
+	names = pd.read_csv(output_csv, usecols=[0]).values
+	X = pd.read_csv(output_csv, usecols=col[1:numHarm+1]).values.astype(float)
+	f = pd.read_csv(output_csv, usecols=[col[-1]]).values.astype(float)
+	harmonics = freq_to_MIDI(X)
+	n = np.round(freq_to_MIDI(f))
+	#the label is the index of the harmonics that is closest to the fundamental frequency
+	y = find_nearest(harmonics, n)
+	omit = names[y==numHarm]
+	for i in range(omit.shape[0]):
+		print 'omitting {}'.format(omit[i,0])
+	X = X[y!=numHarm]
+	y = y[y!=numHarm]
 	print 'features shape: {}'.format(X.shape)
 	print 'labels shape: {}'.format(y.shape)
-	print 'frequency shape: {}'.format(f.shape)
+	print y[y == numHarm]
 	return X, y
 
 def final_model(X,y):
@@ -210,9 +212,9 @@ def main():
 	if not os.path.isfile(output_csv):
 		print '\nfile does not exist'
 		print 'creating file...'
-		X, y = create_data()
+		X, y = write_data()
 	elif sys.argv[2] == 'overwrite':
-		X, y = create_data()
+		X, y = write_data()
 	elif sys.argv[2] == 'keep':
 		X, y = read_data()
 	else:
