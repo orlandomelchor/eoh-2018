@@ -15,11 +15,13 @@ import sys
 import time
 import wave
 import pickle
+import sqlite3
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
 
 #number of harmonics
+totHarm = 1000
 numHarm = 0
 if len(sys.argv)>3:
 	numHarm = int(sys.argv[3])
@@ -31,9 +33,10 @@ cents    = 200		        #width of peak frequency in cents for harmonic detection
 thresh   = 0.005              #percentage from peak frequency to use in threshold
 
 #location of the samples, data, and output file
-dir_ = 'philharmonia/all-samples/'
-data_dir = 'philharmonia/data/'
-output_csv = '{}philharmonia_harmonics.csv'.format(data_dir)
+phil_dir = 'philharmonia/all-samples/'
+good_dir = '/media/orlandomelchor/My Passport/datasets/good-sound/good-sounds/'
+data_dir = 'data/'
+output_csv = '{}harmonics.csv'.format(data_dir)
 
 #location of saved models
 classifier_dir = 'models/'
@@ -115,31 +118,129 @@ def find_nearest(n_harmonics, n):
 
 #write the philharmonia csv file
 def write_data():
-	print 'writing data...'
-	totHarm = 1000
 	#column names for the csv file
 	col = []
 	for i in range(0, totHarm):
 		col.append('harmonic #{}'.format(i))
 	col.append('fundamental frequency')
+	#good_names, good_data = good_sound_data()
+	phil_names, phil_data = philharmonia_data()
+	names = phil_names
+	#names = np.hstack((phil_names, good_names))
+	data_frame = phil_data
+	#data_frame = np.hstack((phil_data, good_data))
+	data = pd.DataFrame(data_frame, columns=col, index = names)
+	data.to_csv(output_csv)
+
+def get_table(table_name, c, columns):
+	prop = ",".join(columns) 
+	c.execute('SELECT {} FROM {}'.format(prop, table_name))
+	data = np.array(c.fetchall(),dtype=object)
+	return data
+
+def good_sound_data():
+	print 'loading good sounds...'
+	#connect to the good_sounds database
+	sqlite_file = 'database.sqlite'
+	conn = sqlite3.connect(sqlite_file)
+	c = conn.cursor()
+
+	###########################sound data###########################
+	#gets note index, note names, and quality
+	sound_cols = np.array([u'id', u'note', u'octave',u'klass'])
+	sound_table = get_table('sounds', c, sound_cols)
+
+	#get all of the unique sound labels exluding None
+	sound_types = np.unique(sound_table[:,3])
+
+	#if it is not this it is a valid sound type
+	sound_types = np.array([sound_type for sound_type in sound_types
+									   if sound_type != None
+									   if sound_type != ''
+									   if not 'scale' in sound_type
+									   if not 'pitch' in sound_type
+									   if not 'tremolo' in sound_type 
+									   if not 'bad-attack' in sound_type 
+									   if not 'timbre-errors' in sound_type 
+									   if not 'stability-timbre' in sound_type])
+
+	#get the elements that are valid sound types and replace the previous sound_table with this one
+	valid_samples = sound_table[:,3] == 'good-sound'
+	for good in sound_types:
+		valid_samples = valid_samples | (sound_table[:,3] == good)
+	sound_table = sound_table[valid_samples,:]
+
+	#combine the note name and the octave together to form the note replacing a sharp with an s
+	notes = np.array([w.replace('#','s') for w in sound_table[:,1]+sound_table[:,2].astype(str)])
+
+	#form a sound_table with the notes instead of the note name and the octave
+	sound_table = np.hstack((sound_table[:,0].reshape(-1,1),notes.reshape(-1,1)))
+
+	###########################file data###########################
+	print 'loading file names...'
+	#get note id and file names
+	takes_cols = np.array([u'id',u'filename'])
+	takes_table  = get_table('takes', c, takes_cols)
+	conn.close()
+
+	#set a blank array using the 'sound' dimension and the 'takes' dimension without the indices labeled
+	data = np.array([]).reshape(0,sound_table.shape[1]+takes_table.shape[1]-1)
+	for sound_sample in sound_table:
+		#samples repeat because recording devices change for the same samples so we need those as well
+		files_info = takes_table[takes_table[:,0]==sound_sample[0]]
+		#the note names are the same for the repeating samples
+		note_names = np.tile(sound_sample[1:],(files_info.shape[0],1))
+		#data will consist of id, filename, and note name
+		repeated_samples = np.hstack((files_info,note_names))
+		data = np.vstack((data,repeated_samples))
+	data = data[:,1:]
+
+	###########################fft samples###########################
+	print 'writing good sounds data...'
+	#initialize features, index labels, fundamental frequencies, and feature names
+	X = np.array([]).reshape(0,totHarm)
+	f = np.array([], int)
+	names = np.array([],str)
+
+	itr = 0
+	for file, note_name in data:
+		#if (itr%30 == 1):
+		#	print 'progress: {}%'.format(round(itr*100.0/data.shape[0],1))
+		#the features are the frequency harmonics from the fft of the signal
+		features = sample_sound_file(good_dir+file, totHarm) #features
+		n = int(name_to_MIDI(note_name))
+		#build the features, labels, fundamental frequency, and feature names
+		X = np.vstack((X,features))
+		f = np.hstack((f, MIDI_to_freq(n)))
+		names = np.hstack((names, file))
+		itr+=1
+	#shapes just for check
+	print 'features shape: {}'.format(X.shape)
+	print 'frequency shape: {}'.format(f.shape)
+	print 'writing data frame...'
+	data_frame = np.hstack((X,f.reshape(f.shape[0],1)))
+	return names, data_frame
+
+def philharmonia_data():
+	print 'writing philharmonia data...'
 	#initialize features, index labels, fundamental frequencies, and feature names
 	X = np.array([]).reshape(0,totHarm)
 	f = np.array([], int)
 	names = np.array([],str)
 	#get the instrument directories
-	directories = [instrument for instrument in os.listdir(dir_) if os.path.isdir(dir_+instrument)]
+	directories = [instrument for instrument in os.listdir(phil_dir) if os.path.isdir(phil_dir+instrument)]
 	for itr, directory in enumerate(directories):
 		#print the instrument being loaded
 		print 'progress: {}%'.format(round(itr*100.0/len(directories),1))
 		#get all the files for that instrument
-		files = [name for name in os.listdir(dir_+directory+'/')]
+		files = [name for name in os.listdir(phil_dir+directory+'/')]
 		for file in files:
 			#split the file by the '_' delimiter and remove the .wav extension 
 			sep = file[:-4].split('_')
 			#if the files only contain a single note and are not phrases do the following
 			if (sep[4] == 'normal' and sep[2].isdigit()):
 				#the features are the frequency harmonics from the fft of the signal
-				features = sample_sound_file(dir_+directory+'/'+file, totHarm) #features
+				features = sample_sound_file(phil_dir+directory+'/'+file, totHarm) #features
 				n = int(name_to_MIDI(sep[1]))
 				#build the features, labels, fundamental frequency, and feature names
 				X = np.vstack((X,features))
@@ -150,10 +251,9 @@ def write_data():
 	print 'features shape: {}'.format(X.shape)
 	print 'frequency shape: {}'.format(f.shape)
 	#save file of the data collected
-	print 'saving csv file...'
+	print 'writing data frame...'
 	data_frame = np.hstack((X,f.reshape(f.shape[0],1)))
-	data = pd.DataFrame(data_frame, columns=col, index = names)
-	data.to_csv(output_csv)
+	return names, data_frame
 
 def read_data():
 	print 'loading csv file...'

@@ -13,6 +13,7 @@ from matplotlib.animation import FuncAnimation
 from math import pi, sin
 import soundtest as st
 import sys
+import time
 import pyaudio
 from sklearn.ensemble import RandomForestClassifier
 import pickle
@@ -162,7 +163,7 @@ def update(frame):
 	curve_arr = np.dot(f.T,(xdata+float(frame)))
 	actual = np.zeros(j)
 	for k in range(numNotes):
-		curve = amp[k]*np.sin(curve_arr[k])
+		curve = amp[k]*np.sin(curve_arr[k]+time.time())
 		ax.plot(xdata[0], curve, label='{} (freq: {})'.format(MIDI_to_name(freq_to_MIDI(f[0,k])), str(int(f[0,k]))))
 		ax.set_xlabel('Time')
 		ax.set_ylabel('Amplitude')
@@ -178,6 +179,5 @@ def update(frame):
 	ax2.set_ylim(-2*np.max(amp), 2*np.max(amp))
 	ax.legend(bbox_to_anchor=(1,1), bbox_transform=plt.gcf().transFigure)
 	ax2.legend()
-
 ani = FuncAnimation(fig, update, interval=10)
 plt.show()

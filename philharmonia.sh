@@ -1,9 +1,9 @@
 #!/bin/bash
 
+mkdir data
 mkdir models/
 mkdir philharmonia/
 cd philharmonia/
-mkdir data
 
 #get philharmonia file
 wget www.philharmonia.co.uk/assets/audio/samples/all-samples.zip

@@ -56,7 +56,7 @@ def filter(FFT):
 	print high_pass
 	print FFT.shape[0]
 	#remove noise within a certain percent of max
-	FFT[FFT < np.max(FFT)*thresh] = 0
+	#FFT[FFT < np.max(FFT)*thresh] = 0
 
 def from_mic():
 	#start stream
