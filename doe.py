@@ -57,9 +57,7 @@ x_test_noisy = np.clip(x_test_noisy, 0., 1.)
 
 #layer dimensions
 input_dim = 144
-layer1_dim = 72 #changed the dimension to match the shape
-layer2_dim = 36
-layer3_dim = 12 #changed the dimension to match the shape
+layer1_dim = 72
 
 #image
 input_image = Input(shape=(input_dim,))
@@ -67,15 +65,7 @@ input_image = Input(shape=(input_dim,))
 #layers
 encoded = Dense(layer1_dim, activation='relu')(input_image)
 print encoded.shape
-encoded = Dense(layer2_dim, activation='relu')(encoded)
-print encoded.shape
-encoded = Dense(layer3_dim, activation='relu')(encoded)
-print encoded.shape
 
-decoded = Dense(layer2_dim, activation='relu')(encoded)
-print decoded.shape
-decoded = Dense(layer1_dim, activation='relu')(decoded)
-print decoded.shape
 decoded = Dense(input_dim, activation='sigmoid')(encoded)
 print decoded.shape
 
@@ -84,7 +74,7 @@ autoencoder = Model(input_image, decoded)
 
 #fit the autoencoder
 sgd = SGD(lr=5, momentum=0.7, decay=0.0, nesterov=False)
-autoencoder.compile(optimizer=sgd, loss='binary_crossentropy',metrics=['accuracy'])
+autoencoder.compile(optimizer=sgd, loss='binary_crossentropy')
 autoencoder.fit(x_train_noisy, x_train,
                 epochs=1000,
                 batch_size=1024,
