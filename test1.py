@@ -10,18 +10,30 @@ import dask.array as da
 
 Format   = pyaudio.paInt16
 Channels = 1
-Chunk    = pow(2,10)
+Chunk    = pow(2,-4)
 #ideal file
 phil_dir = 'philharmonia/all-samples/'
-length = 8192
+frame_rate = 44100.0
+seconds = .125
+length = int(frame_rate*seconds)
+pad = False
+
+def is_float(input):
+  try:
+    num = float(input)
+  except ValueError:
+    return False
+  return True
 
 def ideal_signal(file):
 	spf = wave.open(file, 'r')
 	frames = spf.readframes(-1)
 	signal = np.fromstring(frames, 'Int16')
-	padding = length - signal.shape[0]%length
-	signal = np.pad(signal, (0,padding), 'constant').reshape(-1,length)
-
+	if pad:	
+		padding = length - signal.shape[0]%length
+		signal = np.pad(signal, (0,padding), 'constant').reshape(-1,length)
+	else:
+		signal = signal[:(signal.shape[0]/length)*length].reshape(-1,length)
 	return signal
 
 def other(file):	
@@ -75,19 +87,20 @@ for itr, directory in enumerate(directories):
 			sep[2] = '1.0'
 		elif sep[2] == '15':
 			sep[2] = '1.5'
-		#if the files only contain a single note and are not phrases do the following
-		#the features are the frequency harmonics from the fft of the signal
-		signal = ideal_signal(phil_dir+directory+'/'+file)
-		size = signal.shape[0]
-		for i in range(signal.shape[0]):
-			out.write('{},'.format(row_indx))
-			out.write('{},'.format(i))
-			for j in range(len(sep)):
-				out.write('{},'.format(sep[j]))
-			for j in range(signal.shape[1]-1):
-				out.write('{},'.format(signal[i,j]))
-			out.write(str(signal[i,-1])+'\n')
-			row_indx+=1
+		if (sep[4] == 'normal' and is_float(sep[2])):
+			#if the files only contain a single note and are not phrases do the following
+			#the features are the frequency harmonics from the fft of the signal
+			signal = ideal_signal(phil_dir+directory+'/'+file)
+			size = signal.shape[0]
+			for i in range(signal.shape[0]):
+				out.write('{},'.format(row_indx))
+				out.write('{},'.format(i))
+				for j in range(len(sep)):
+					out.write('{},'.format(sep[j]))
+				for j in range(signal.shape[1]-1):
+					out.write('{},'.format(signal[i,j]))
+				out.write(str(signal[i,-1])+'\n')
+				row_indx+=1
 	print row_indx
 		#segment = np.vstack((segment,np.arange(size).reshape(-1,1)))
 		#info = np.vstack((info,np.repeat(np.array(sep).reshape(1,-1),size,axis=0)))

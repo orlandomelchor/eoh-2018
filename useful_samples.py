@@ -50,7 +50,7 @@ for chunk in chunks:
 	#use = useful_locations[locations] - (curr_min_index)
 	#useful_locations = useful_locations[~locations]
 	FFT = np.abs(np.fft.rfft(samples*Hann,axis=1))
-	adj_FFT = np.array([np.max(e,axis=1) if e.shape[1]!=0 else np.zeros(e.shape[0]) for e in np.split(FFT,top,axis=1)[:-1]]).T
+	adj_FFT = np.array([np.max(e,axis=1) if e.shape[1]>=1 else np.zeros(e.shape[0]) for e in np.split(FFT,top,axis=1)[:-1]]).T
 	FFT_samples[index:(index+FFT.shape[0])] = adj_FFT
 	index = index+FFT.shape[0]
 	print '{} of {}'.format(index, total_rows)

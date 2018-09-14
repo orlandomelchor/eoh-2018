@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import math
 from keras.datasets import mnist
 from keras.layers import Input, Dense, Conv1D, MaxPooling1D, UpSampling1D
 from keras.callbacks import TensorBoard
@@ -8,6 +9,8 @@ from keras import backend as K
 from keras.optimizers import SGD
 import pandas as pd
 from sklearn.preprocessing import normalize
+from sklearn.preprocessing import MinMaxScaler
+from keras.callbacks import LearningRateScheduler
 
 def plotNumbers(original, noisy_original, reconstruction):
 	m = 3
@@ -29,7 +32,9 @@ def plotNumbers(original, noisy_original, reconstruction):
 
 data = pd.read_csv('reduced_shape_FFT.csv').values[:,1:]
 print data.shape
-data = normalize(data)
+data =  MinMaxScaler().fit_transform(data)
+print np.min(data[0])
+print np.max(data[0])
 np.random.shuffle(data)
 size = int(data.shape[0]*.8)
 x_train = data[:size]
@@ -53,7 +58,7 @@ x_test_noisy = np.clip(x_test_noisy, 0., 1.)
 #layer dimensions
 input_dim = 144
 layer1_dim = 72 #changed the dimension to match the shape
-layer2_dim = 48
+layer2_dim = 36
 layer3_dim = 12 #changed the dimension to match the shape
 
 #image
@@ -67,29 +72,22 @@ print encoded.shape
 encoded = Dense(layer3_dim, activation='relu')(encoded)
 print encoded.shape
 
-decoded = Dense(layer3_dim, activation='relu')(encoded)
-print decoded.shape
-decoded = Dense(layer2_dim, activation='relu')(decoded)
+decoded = Dense(layer2_dim, activation='relu')(encoded)
 print decoded.shape
 decoded = Dense(layer1_dim, activation='relu')(decoded)
 print decoded.shape
-
 decoded = Dense(input_dim, activation='sigmoid')(encoded)
 print decoded.shape
 
-#autoencoder, encoder, and decoder models
+#autoencoder models
 autoencoder = Model(input_image, decoded)
-encoder = Model(input_image, encoded)
-encoded_input = Input(shape=(layer3_dim,))
-decoder_layer = autoencoder.layers[-1]
-decoder = Model(encoded_input, decoder_layer(encoded_input))
-autoencoder = Model(input_image, decoded)
+
 #fit the autoencoder
-sgd = SGD(lr=5, momentum=0.5, nesterov=True)
+sgd = SGD(lr=5, momentum=0.7, decay=0.0, nesterov=False)
 autoencoder.compile(optimizer=sgd, loss='binary_crossentropy',metrics=['accuracy'])
 autoencoder.fit(x_train_noisy, x_train,
-                epochs=100,
-                batch_size=256,
+                epochs=1000,
+                batch_size=1024,
                 shuffle=True,
                 validation_data=(x_test_noisy, x_test))
 
@@ -98,8 +96,8 @@ x_test_unnoisy = autoencoder.predict(x_test_noisy)
 # serialize model to HDF5
 autoencoder.save('test_network.h5')
 print("Saved model to disk")
-
-plt.plot(x_test.flatten()-x_test_unnoisy.flatten())
+residual = x_test.flatten()-x_test_unnoisy.flatten()
+plt.plot(residual)
 plt.show()
 
 plotNumbers(x_test, x_test_noisy, x_test_unnoisy)
