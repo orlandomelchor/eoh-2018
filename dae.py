@@ -31,10 +31,7 @@ def plotNumbers(original, noisy_original, reconstruction):
 
 
 data = pd.read_csv('reduced_shape_FFT.csv').values[:,1:]
-print data.shape
 data =  MinMaxScaler().fit_transform(data)
-print np.min(data[0])
-print np.max(data[0])
 np.random.shuffle(data)
 size = int(data.shape[0]*.8)
 x_train = data[:size]
@@ -48,8 +45,8 @@ size = x_train.shape[1]
 #x_test = np.reshape(x_test, (len(x_test), size, 1))  # adapt this if using `channels_first` image data format
 
 noise_factor = 0.05
-x_train_noisy = x_train + noise_factor * np.random.normal(loc=0.0, scale=1.0, size=x_train.shape) 
-x_test_noisy = x_test + noise_factor * np.random.normal(loc=0.0, scale=1.0, size=x_test.shape) 
+x_train_noisy = x_train + noise_factor * np.random.random(x_train.shape) 
+x_test_noisy = x_test + noise_factor * np.random.random(x_test.shape) 
 
 x_train_noisy = np.clip(x_train_noisy, 0., 1.)
 x_test_noisy = np.clip(x_test_noisy, 0., 1.)
@@ -57,7 +54,8 @@ x_test_noisy = np.clip(x_test_noisy, 0., 1.)
 
 #layer dimensions
 input_dim = 144
-layer1_dim = 72
+layer1_dim = 72 #changed the dimension to match the shape
+layer2_dim = 48
 
 #image
 input_image = Input(shape=(input_dim,))
@@ -65,8 +63,12 @@ input_image = Input(shape=(input_dim,))
 #layers
 encoded = Dense(layer1_dim, activation='relu')(input_image)
 print encoded.shape
+encoded = Dense(layer2_dim, activation='relu')(encoded)
+print encoded.shape
 
-decoded = Dense(input_dim, activation='sigmoid')(encoded)
+decoded = Dense(layer1_dim, activation='relu')(encoded)
+print encoded.shape
+decoded = Dense(input_dim, activation='sigmoid')(decoded)
 print decoded.shape
 
 #autoencoder models
@@ -77,8 +79,8 @@ sgd = SGD(lr=5, momentum=0.7, decay=0.0, nesterov=False)
 autoencoder.compile(optimizer=sgd, loss='binary_crossentropy')
 autoencoder.fit(x_train_noisy, x_train,
                 epochs=1000,
-                batch_size=1024,
-                shuffle=True,
+                batch_size=512,
+                shuffle=False,
                 validation_data=(x_test_noisy, x_test))
 
 x_test_unnoisy = autoencoder.predict(x_test_noisy)

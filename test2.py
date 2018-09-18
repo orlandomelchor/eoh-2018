@@ -28,8 +28,8 @@ def window(n,cents):
 
 header = pd.read_csv('philharmonia_signals.csv',nrows=1,header=None).values
 time = header[0,-1]
-# Hann window function ##https://en.wikipedia.org/wiki/Hann_function
 signals = pd.read_csv('philharmonia_signals.csv',nrows=10000,usecols=np.arange(7,header.shape[1])).values[:,1:]
+# Hann window function ##https://en.wikipedia.org/wiki/Hann_function
 Hann= 0.5* (1-np.cos(np.linspace(0,2*np.pi, signals.shape[1],False)))	#end point not included
 signals = signals*Hann
 
@@ -40,9 +40,7 @@ max_MIDI = 144
 cents = 50
 midi_frequencies = np.arange(max_MIDI)
 top_windows = top_window(midi_frequencies,cents)
-t0 = t.time()
 adj_FFT = np.array([np.max(e,axis=1) if e.shape[1]>1 else np.zeros(e.shape[0]) for e in np.split(FFT,top_windows,axis=1)[:-1]]).T
-print t.time() - t0
 '''
 windows = window(midi_frequencies,cents)
 t0 = t.time()
@@ -52,14 +50,6 @@ print t.time() - t0
 '''
 n_frequencies = np.array([freq_to_MIDI(f) for f in frequencies])
 
-
-
-
-data_frame = pd.DataFrame(adj_FFT)
-data_frame.to_csv('reduced_resolution_FFT.csv')
-
-print FFT.shape
-print adj_FFT.shape
 for i in range(FFT.shape[0]):
 	plt.subplot(1, 4, 1)
 	plt.title('Original signal')

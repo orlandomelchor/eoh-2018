@@ -100,6 +100,9 @@ def freq_to_MIDI(f):
 def name_to_MIDI(note):
 	return (noteNames.index(note[:-1]))+(int(note[-1])+1)*12
 
+def name_to_freq(note):
+	return MIDI_to_freq(name_to_MIDI(note))
+
 #convert MIDI note to a frequency
 def MIDI_to_freq(n):
 	return 440 * pow(2.0,(n-69)/12.0)
