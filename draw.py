@@ -109,14 +109,14 @@ class Note:
 		extraLines = []
 		#if note lies below staff add more lines downwards
 		if n0 < 62:
-			numLines = int(interval/.024-5)/2+1
+			numLines = int(interval/.024-5)//2+1
 			for itr in range(numLines):
 				extraLine = Line(Point(N*(.51-.045),N*(.519+.024*(5+2*itr))), Point(N*(.51+.045),N*(.519+.024*(5+2*itr))))
 				extraLine.setWidth(6)
 				extraLines.append(extraLine)
 		#if note lies above staff add more lines on top
 		elif n0 > 80:
-			numLines = -int(7+interval/.024)/2+1
+			numLines = -int(7+interval/.024)//2+1
 			for itr in range(numLines):
 				extraLine = Line(Point(N*(.51-.045),N*(.519+.024*(-7-2*itr))), Point(N*(.51+.045),N*(.519+.024*(-7-2*itr))))
 				extraLine.setWidth(6)
@@ -189,7 +189,7 @@ def sample_sound(n):
 #gather noise to remove from the signal
 def collect_noise(rec=noise_secs):
 	noise = collect_signal(rec)
-	rec_mult = noise.shape[0]/signal.shape[0]
+	rec_mult = noise.shape[0]//signal.shape[0]
 	#take the average of the noise signal over equal Rec_secs intervals
 	noise = noise.reshape(rec_mult,-1)
 	return np.mean(np.abs(np.fft.rfft(noise)),axis=0)
@@ -224,11 +224,11 @@ def harmonic_detector(FFT, numHarm):
 ####################audio detection begins here####################
 
 #random forest model for fundamental detection
-print 'loading fundamental frequency model...'
+print('loading fundamental frequency model...')
 filename = '{}fundamental_frequency_{}.sav'.format(model_dir,numNotes)
 model = pickle.load(open(filename, 'rb'))
 
-print 'initializing signal detector...'
+print('initializing signal detector...')
 #start stream
 audio = pyaudio.PyAudio()
 stream = audio.open(format=Format,
@@ -240,7 +240,7 @@ stream = audio.open(format=Format,
 signal = collect_signal()
 
 #gathering background noise
-print 'do not play collecting background noise...'
+print('do not play collecting background noise...')
 noise = collect_noise()
 
 #maximum threshold is the peak of the environment
@@ -256,7 +256,7 @@ def main():
 	f = (np.zeros(numNotes)-1)
 	notes = []
 	#begin sampling sounds
-	print 'you can now play...'
+	print('you can now play...')
 	while 1:
 		#get top frequencies with note names
 		f0 = f
