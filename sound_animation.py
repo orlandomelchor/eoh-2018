@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 ######################
-#Author: Sarah Habib
-#		 Orlando Melchor-Alonso
+#Authors: Sarah Habib
+#	  Orlando Melchor-Alonso
 #Last Updated: 2018/07/24
 ######################
 #Objective: create an animation for the components and superposition of sound signals
