@@ -10,11 +10,11 @@ Dependencies:
 * pickle
 * wave
 
-Training Data Setup:
+Setup:
 ------------
 ```bash 
 # Install the philharmonia dataset, convert .mp3 files to .wav, and organize the directory.
-# NOTE: This takes a long time to run and files created are very large (4.5 Gb). Only run this if interested in development.
+# NOTE: This takes a long time to run and storage space required is around 4.5 Gb.
 chmod +x philharmonia.sh 
 ./philharmonia.sh
 ```
@@ -30,14 +30,13 @@ Demonstrations
 -----------
 ```bash
 # Piano synthesizer
-python synth.py
+python3 synth.py
 
-# Sound visualization:
-python sound_animation.py {int arg for num harmonics}
+# Sound visualization (args: numHarmonics 1-20):
+python3 sound_animation.py 3
 
-# FFT analysis of sound from microphone input:
-python demo1.py {int arg for num harmonics}
+# FFT analysis of sound from microphone input (args: numHarmonics 1-20):
+python3 demo1.py 3
 
-# Musical notes visualization:
-python draw.py {int arg for num harmonics}
-```
+# Musical notes visualization (args: numHarmonics 1-20):
+python3 draw.py 3```
