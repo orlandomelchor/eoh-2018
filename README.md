@@ -5,7 +5,8 @@ Training Data Setup:
 ------------
 ```bash 
 # NOTE: This takes a long time and the files generated are really large (4.5 Gb)
-chmod +x philharmonia.sh && ./philharmonia.sh
+chmod +x philharmonia.sh 
+./philharmonia.sh
 ```
 
 Machine Learning Models:
