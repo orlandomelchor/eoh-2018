@@ -1,4 +1,4 @@
-EOH-2018: Sound visualization for electronic band EOH project.
+EOH-2018: Sound visualization for EOH electronic band.
 ================================================
 
 Dependencies:
