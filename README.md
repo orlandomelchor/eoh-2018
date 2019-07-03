@@ -1,5 +1,6 @@
-EOH-2018: Sound visualization for EOH electronic band.
+EOH-2018: Sound visualization for EOH electronic band
 ================================================
+This is an old project presented at UIUC for EOH-2018 that was last maintained by mlchrln2. Some demonstrations are included to get an idea of where this project was going. The rest of this project is private and has moved over to mlchrln2's GitLab account @SimplySymplectic88. Another spin off project is in the making in Github named BeyondMIDI. Check there for more updates on this project.
 
 Dependencies:
 ------------
