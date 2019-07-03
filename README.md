@@ -1,10 +1,20 @@
 EOH-2018: Sound visualization for electronic band EOH project.
 ================================================
 
+Dependencies:
+------------
+* ffmpeg
+* pygame
+* pyaudio
+* sklearn
+* pickle
+* wave
+
 Training Data Setup:
 ------------
 ```bash 
-# NOTE: This takes a long time and the files generated are really large (4.5 Gb)
+# Install the philharmonia dataset, convert .mp3 files to .wav, and organize the directory.
+# NOTE: This takes a long time to run and files created are very large (4.5 Gb). Only run this if interested in development.
 chmod +x philharmonia.sh 
 ./philharmonia.sh
 ```
